@@ -24,14 +24,13 @@ async function update() {
   if (reg_data && reg_data.length != 0) {
     url = reg_data[0];
     child.execSync("touch ./version.txt");
+    // prettier-ignore
     if (url != (await fs.readFile("./version.txt", "utf-8"))) {
       await fs.writeFile("./version.txt", url);
       child.execSync(`curl -sLo minecraft.zip ${url}`);
       child.execSync("unzip minecraft.zip -d minecraft");
       child.execSync("rm -rf ./minecraft.zip");
-      child.execSync(
-        "echo 'emit-server-telemetry=true' >> ./minecraft/server.properties"
-      );
+      child.execSync("echo 'emit-server-telemetry=true' >> ./minecraft/server.properties");
     }
   }
 }
