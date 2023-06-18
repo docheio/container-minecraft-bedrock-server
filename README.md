@@ -1,4 +1,4 @@
-# Minecraft Bedrock Latest
+# Minecraft Bedrock Server
 
 ```bash
 # This command is going to update or install and run the latest minecraft bedrock server.
