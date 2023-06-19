@@ -7,6 +7,7 @@
 /* prettier-ignore */ import { existsSync }		from "fs";
 /* prettier-ignore */ import { sig_end_kit }	from "./handler/sig_handler";
 /* prettier-ignore */ import { sleep }			from "./module/sleep";
+/* prettier-ignore */ import { mini_shell }		from "./module/mini_shell";
 
 const console = new tslog.Logger();
 
@@ -78,6 +79,8 @@ async function exec() {
 		if (data == "Quit correctly\n") process.exit(0);
 	});
 
+	mini_shell(proc);
+
 	sig_end_kit(async (i = 0, exited = false) => {
 		proc.addListener("close", () => (exited = true));
 		proc.stdin.write("stop\n");
@@ -87,7 +90,7 @@ async function exec() {
 
 async function backup() {
 	cron.schedule("0 0 0,6,12,18 * * *", async () => {
-		console.warn("BACKUP");
+		console.info("BACKUP");
 		child.execSync(`mkdir -p ./mount/backup`);
 		let files = await fs.readdir("./mount/backup");
 		files.forEach((file) => {
