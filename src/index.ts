@@ -2,10 +2,10 @@
 /* prettier-ignore */ import * as readline		from "readline";
 /* prettier-ignore */ import * as tslog			from "tslog";
 /* prettier-ignore */ import axios				from "axios";
+/* prettier-ignore */ import cron				from "node-cron";
 /* prettier-ignore */ import fs					from "fs/promises";
 /* prettier-ignore */ import { sig_end_kit }	from "./handler/sig_handler";
 /* prettier-ignore */ import { sleep }			from "./module/sleep";
-/* prettier-ignore */ import { color }			from "./module/cli_color";
 
 const console = new tslog.Logger();
 
@@ -43,20 +43,11 @@ async function exec() {
 	const reader = readline.createInterface({ input: process.stdin });
 	const proc = child.spawn("./bedrock_server", [], { cwd: "./minecraft" });
 
-	proc.stdout.setEncoding("utf-8");
-
 	reader.on("line", (line) => {
-		proc.stdin.write(line);
+		proc.stdin.write(`${line}\n`);
 	});
 
-	let exited = false;
-	sig_end_kit(async () => {
-		proc.stdin.write("stop\n");
-		let i = 0;
-		while (!exited && i++ <= 40) await sleep(500);
-		console.warn(`${color.red}[SIGEND]${color.default} Received`);
-	});
-
+	proc.stdout.setEncoding("utf-8");
 	proc.stdout.on("data", async (data) => {
 		let lines: string[];
 		let i: number = 0;
@@ -64,14 +55,37 @@ async function exec() {
 		lines = data.split("\n");
 		lines = lines.filter((line: string) => line !== "");
 		while (i < lines.length) console.info(lines[i++]);
+		if (data == "Quit correctly\n") process.exit(0);
 	});
 
-	proc.addListener("close", () => {
-		exited = true;
+	sig_end_kit(async (i = 0, exited = false) => {
+		proc.addListener("close", () => (exited = true));
+		proc.stdin.write("stop\n");
+		while (exited == false && ++i <= 40) await sleep(500);
 	});
 }
 
-async function backup() {}
+async function backup() {
+	// cron.schedule("0 0 0,6,12,18 * * *", async () => {
+	cron.schedule("* * * * * *", async () => {
+		console.warn("BACKUP");
+		child.execSync(`mkdir -p backup`);
+		let files = await fs.readdir("./backup");
+		files.forEach((file) => {
+			if (!file.endsWith(".tar.gz"))
+				child.execSync(`rm -rf ${file}`, { cwd: "./backup" });
+		});
+		files = await fs.readdir("./backup");
+		if (files.length >= 5) {
+			files = files.sort().reverse();
+			let i = files.length - 1;
+			while (i >= 4)
+				child.execSync(`rm -rf ./${files[i--]}`, { cwd: "./backup" });
+		}
+		// prettier-ignore
+		child.execSync(`tar zcfp ../backup/${Date.now()}.tar.gz behavior_packs resource_packs worlds allowlist.json permissions.json server.properties`, { cwd: "./minecraft" });
+	});
+}
 
 async function main() {
 	await update();
@@ -79,4 +93,4 @@ async function main() {
 	backup();
 }
 
-((_) => _())(main);
+/* prettier-ignore */ (_=>_())(main);
