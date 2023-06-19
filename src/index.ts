@@ -26,10 +26,10 @@ async function update() {
 	let reg_data = res.data.match(/https:\/\/minecraft\.azureedge\.net\/bin-linux\/bedrock-server-[0-9.]+\.zip/);
 	if (reg_data && reg_data.length != 0) {
 		url = reg_data[0];
-		child.execSync("touch ./version.txt");
-		if (url != (await fs.readFile("./version.txt", "utf-8"))) {
-			await fs.writeFile("./version.txt", url);
-			child.execSync("mkdir -p ./mount");
+		child.execSync("mkdir -p ./mount");
+		child.execSync("touch ./version.txt", { cwd: "mount" });
+		if (url != (await fs.readFile("./mount/version.txt", "utf-8"))) {
+			await fs.writeFile("./mount/version.txt", url);
 			child.execSync(`curl -sLo minecraft.zip ${url}`);
 			child.execSync("unzip minecraft.zip -d ./cache");
 			if (existsSync("./mount/minecraft")) {
