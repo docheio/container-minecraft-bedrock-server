@@ -5,4 +5,4 @@
 yarn all
 ```
 
-To make data persistent, a folder or volume must be mounted to /root/mount.
+To make data persistent, a folder or volume must be mounted to `/root/mount`.
