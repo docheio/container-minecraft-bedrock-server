@@ -4,6 +4,7 @@
 /* prettier-ignore */ import axios				from "axios";
 /* prettier-ignore */ import cron				from "node-cron";
 /* prettier-ignore */ import fs					from "fs/promises";
+/* prettier-ignore */ import { existsSync }		from "fs";
 /* prettier-ignore */ import { sig_end_kit }	from "./handler/sig_handler";
 /* prettier-ignore */ import { sleep }			from "./module/sleep";
 
@@ -26,14 +27,31 @@ async function update() {
 	if (reg_data && reg_data.length != 0) {
 		url = reg_data[0];
 		child.execSync("touch ./version.txt");
-		// prettier-ignore
 		if (url != (await fs.readFile("./version.txt", "utf-8"))) {
 			await fs.writeFile("./version.txt", url);
-			child.execSync("mkdir ./mount");
+			child.execSync("mkdir -p ./mount");
 			child.execSync(`curl -sLo minecraft.zip ${url}`);
-			child.execSync("unzip minecraft.zip -d ./mount/minecraft");
-			child.execSync("rm -rf ./minecraft.zip");
-			child.execSync("echo 'emit-server-telemetry=true' >> ./mount/minecraft/server.properties");
+			child.execSync("unzip minecraft.zip -d ./cache");
+			if (existsSync("./mount/minecraft")) {
+				console.info("Updating");
+				child.execSync("rm -rf allowlist.json", { cwd: "./cache" });
+				child.execSync("rm -rf behavior_packs", { cwd: "./cache" });
+				child.execSync("rm -rf permissions.json", { cwd: "./cache" });
+				child.execSync("rm -rf resource_packs", { cwd: "./cache" });
+				child.execSync("rm -rf server.properties", { cwd: "./cache" });
+				child.execSync("rm -rf bedrock_server", { cwd: "./mount/minecraft" });
+				child.execSync("rm -rf *.html", { cwd: "./mount/minecraft" });
+				child.execSync("rm -rf *.debug", { cwd: "./mount/minecraft" });
+				child.execSync("rm -rf *.txt", { cwd: "./mount/minecraft" });
+				child.execSync("rm -rf config", { cwd: "./mount/minecraft" });
+				child.execSync("rm -rf definitions", { cwd: "./mount/minecraft" });
+			}
+			child.execSync("mkdir -p ./mount/minecraft");
+			child.execSync("cp -r ./cache/* ./mount/minecraft/");
+			child.execSync("rm -rf ./cache minecraft.zip");
+			child.execSync("echo 'emit-server-telemetry=true' >> server.properties", {
+				cwd: "./mount/minecraft",
+			});
 		}
 	}
 }
@@ -83,8 +101,10 @@ async function backup() {
 			while (i >= 4)
 				child.execSync(`rm -rf ${files[i--]}`, { cwd: "./mount/backup" });
 		}
-		// prettier-ignore
-		child.execSync(`tar zcfp ../backup/${Date.now()}.tar.gz behavior_packs resource_packs worlds allowlist.json permissions.json server.properties`, { cwd: "./mount/minecraft" });
+		child.execSync(
+			`tar zcfp ../backup/${Date.now()}.tar.gz allowlist.json behavior_packs permissions.json resource_packs server.properties`,
+			{ cwd: "./mount/minecraft" }
+		);
 	});
 }
 

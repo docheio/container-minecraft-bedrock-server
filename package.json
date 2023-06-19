@@ -7,8 +7,8 @@
     "all": "yarn run in && yarn run clean && yarn run build && yarn run start",
     "in": "yarn install --silent",
     "start": "node ./dist",
-    "clean": "rm -rf ./dist",
-    "fclean": "yarn run clean && rm -rf ./node_modules ./minecraft* ./version.txt",
+    "clean": "rm -rf ./dist ./cache minecraft.zip",
+    "fclean": "yarn run clean && rm -rf ./node_modules ./mount version.txt",
     "build": "npx tsc"
   },
   "dependencies": {
