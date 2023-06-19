@@ -29,10 +29,11 @@ async function update() {
 		// prettier-ignore
 		if (url != (await fs.readFile("./version.txt", "utf-8"))) {
 			await fs.writeFile("./version.txt", url);
+			child.execSync("mkdir ./mount");
 			child.execSync(`curl -sLo minecraft.zip ${url}`);
-			child.execSync("unzip minecraft.zip -d minecraft");
+			child.execSync("unzip minecraft.zip -d ./mount/minecraft");
 			child.execSync("rm -rf ./minecraft.zip");
-			child.execSync("echo 'emit-server-telemetry=true' >> ./minecraft/server.properties");
+			child.execSync("echo 'emit-server-telemetry=true' >> ./mount/minecraft/server.properties");
 		}
 	}
 }
@@ -41,7 +42,8 @@ async function exec() {
 	process.stdin.setEncoding("utf8");
 
 	const reader = readline.createInterface({ input: process.stdin });
-	const proc = child.spawn("./bedrock_server", [], { cwd: "./minecraft" });
+	// prettier-ignore
+	const proc = child.spawn("./bedrock_server", [], { cwd: "./mount/minecraft" });
 
 	reader.on("line", (line) => {
 		proc.stdin.write(`${line}\n`);
@@ -68,21 +70,21 @@ async function exec() {
 async function backup() {
 	cron.schedule("0 0 0,6,12,18 * * *", async () => {
 		console.warn("BACKUP");
-		child.execSync(`mkdir -p backup`);
-		let files = await fs.readdir("./backup");
+		child.execSync(`mkdir -p ./mount/backup`);
+		let files = await fs.readdir("./mount/backup");
 		files.forEach((file) => {
 			if (!file.endsWith(".tar.gz"))
-				child.execSync(`rm -rf ${file}`, { cwd: "./backup" });
+				child.execSync(`rm -rf ${file}`, { cwd: "./mount/backup" });
 		});
-		files = await fs.readdir("./backup");
+		files = await fs.readdir("./mount/backup");
 		if (files.length >= 5) {
 			files = files.sort().reverse();
 			let i = files.length - 1;
 			while (i >= 4)
-				child.execSync(`rm -rf ./${files[i--]}`, { cwd: "./backup" });
+				child.execSync(`rm -rf ${files[i--]}`, { cwd: "./mount/backup" });
 		}
 		// prettier-ignore
-		child.execSync(`tar zcfp ../backup/${Date.now()}.tar.gz behavior_packs resource_packs worlds allowlist.json permissions.json server.properties`, { cwd: "./minecraft" });
+		child.execSync(`tar zcfp ../backup/${Date.now()}.tar.gz behavior_packs resource_packs worlds allowlist.json permissions.json server.properties`, { cwd: "./mount/minecraft" });
 	});
 }
 
