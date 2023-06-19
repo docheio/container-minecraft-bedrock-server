@@ -66,8 +66,7 @@ async function exec() {
 }
 
 async function backup() {
-	// cron.schedule("0 0 0,6,12,18 * * *", async () => {
-	cron.schedule("* * * * * *", async () => {
+	cron.schedule("0 0 0,6,12,18 * * *", async () => {
 		console.warn("BACKUP");
 		child.execSync(`mkdir -p backup`);
 		let files = await fs.readdir("./backup");
