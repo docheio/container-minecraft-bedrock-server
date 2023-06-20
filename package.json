@@ -6,7 +6,7 @@
   "scripts": {
     "all": "yarn run in && yarn run clean && yarn run build && yarn run start",
     "in": "yarn install --silent",
-    "start": "node ./dist",
+    "start": "node --enable-source-maps --experimental-specifier-resolution=node ./dist",
     "clean": "rm -rf ./cache minecraft.zip",
     "fclean": "yarn run clean && rm -rf ./dist ./node_modules ./mount",
     "build": "npx tsc"

@@ -79,13 +79,13 @@ async function exec() {
 		if (data == "Quit correctly\n") process.exit(0);
 	});
 
-	mini_shell(proc);
-
 	sig_end_kit(async (i = 0, exited = false) => {
 		proc.addListener("close", () => (exited = true));
 		proc.stdin.write("stop\n");
 		while (exited == false && ++i <= 40) await sleep(500);
 	});
+
+	mini_shell(proc);
 }
 
 async function backup() {
