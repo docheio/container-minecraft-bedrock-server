@@ -19,7 +19,7 @@ export const mini_shell = async (
 	app.post("/", async (req, res) => {
 		if (req.body && req.body["command"]) {
 			proc.stdin.write(`${req.body["command"]}\n`);
-			console.info(`minishell: ${req.body["command"]}`);
+			console.info(`shell> ${req.body["command"]}`);
 		}
 		res.send(req.body["command"]);
 	});
