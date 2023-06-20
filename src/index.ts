@@ -50,9 +50,9 @@ async function update() {
 			child.execSync("mkdir -p ./mount/minecraft");
 			child.execSync("cp -r ./cache/* ./mount/minecraft/");
 			child.execSync("rm -rf ./cache minecraft.zip");
-			child.execSync("echo 'emit-server-telemetry=true' >> server.properties", {
-				cwd: "./mount/minecraft",
-			});
+			// prettier-ignore
+			if (!(await fs.readFile("./mount/minecraft/server.properties", "utf-8")).includes("emit-server-telemetry=true"))
+				child.execSync("echo 'emit-server-telemetry=true' >> server.properties", { cwd: "./mount/minecraft" });
 		}
 	}
 }
