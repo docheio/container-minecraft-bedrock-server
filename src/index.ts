@@ -76,7 +76,6 @@ async function exec() {
 		lines = data.split("\n");
 		lines = lines.filter((line: string) => line !== "");
 		while (i < lines.length) console.info(lines[i++]);
-		if (data == "Quit correctly\n") process.exit(0);
 	});
 
 	proc.addListener("close", () => {
