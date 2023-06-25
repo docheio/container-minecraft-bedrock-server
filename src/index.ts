@@ -79,8 +79,11 @@ async function exec() {
 		if (data == "Quit correctly\n") process.exit(0);
 	});
 
+	proc.addListener("close", () => {
+		process.exit(0);
+	});
+
 	sig_end_kit(async (i = 0, exited = false) => {
-		proc.addListener("close", () => (exited = true));
 		proc.stdin.write("stop\n");
 		while (exited == false && ++i <= 40) await sleep(500);
 	});
