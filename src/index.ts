@@ -105,7 +105,7 @@ async function backup() {
 				child.execSync(`rm -rf ${files[i--]}`, { cwd: "./mount/backup" });
 		}
 		child.execSync(
-			`tar zcfp ../backup/${Date.now()}.tar.gz allowlist.json behavior_packs permissions.json resource_packs server.properties`,
+			`tar zcfp ../backup/${Date.now()}.tar.gz worlds allowlist.json behavior_packs permissions.json resource_packs server.properties`,
 			{ cwd: "./mount/minecraft" }
 		);
 	});
