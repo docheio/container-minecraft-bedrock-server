@@ -24,6 +24,6 @@ export const mini_shell = async (
 		res.send(req.body["command"]);
 	});
 	app.listen(8080, "127.0.0.1", () => {
-		console.info("mnishell server start");
+		console.info("minishell server start");
 	});
 };
